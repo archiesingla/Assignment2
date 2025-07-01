@@ -4,6 +4,8 @@ from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from datetime import datetime
 import os
+from pymongo.errors import ConnectionFailure
+
 
 app = Flask(__name__)
 CORS(app)
