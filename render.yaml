@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: mediconnect-backend
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    envVars:
+      - key: MONGO_URI
+        value: mongodb+srv://archi:vish@cluster.qavglax.mongodb.net/mediconnect?retryWrites=true&w=majority
