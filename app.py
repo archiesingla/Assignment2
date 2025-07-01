@@ -6,21 +6,29 @@ from datetime import datetime
 import os
 from pymongo.errors import ConnectionFailure
 
-
 app = Flask(__name__)
 CORS(app)
 
-# MongoDB connection 
-app.config["MONGO_URI"] = "mongodb+srv://archi:vish@cluster.qavglax.mongodb.net/mediconnect?retryWrites=true&w=majority"
-mongo = PyMongo(app)
+# ✅ Use Render environment variable and force TLS
+MONGO_URI = os.environ.get("MONGO_URI")
+if not MONGO_URI:
+    print("❌ MONGO_URI is not set in environment variables.")
+    exit(1)
+
+# ✅ Add TLS fix
+if "tls=true" not in MONGO_URI:
+    MONGO_URI += "&tls=true"
+
+app.config["MONGO_URI"] = MONGO_URI
 
 try:
     mongo = PyMongo(app)
-    mongo.cx.server_info()
-    print("MongoDB connected successfully.")
+    mongo.cx.server_info()  # Force connection test
+    print("✅ MongoDB connected successfully.")
 except ConnectionFailure as e:
-    print("MongoDB connection failed:", e)
+    print("❌ MongoDB connection failed:", e)
     exit(1)
+
 appointments_collection = mongo.db.appointments
 
 # 📌 POST /api/appointments/book
@@ -43,7 +51,7 @@ def book_appointment():
         "appointment_time": appointment_time
     })
     if conflict:
-        return jsonify({"error": "Please use the different time slot as this is already booked."}), 409
+        return jsonify({"error": "Please use a different time slot, as this is already booked."}), 409
 
     result = appointments_collection.insert_one({
         "patient_id": data["patient_id"],
@@ -65,7 +73,7 @@ def get_patient_appointments(patient_id):
     appointments = list(appointments_collection.find({"patient_id": patient_id}))
 
     if not appointments:
-        return jsonify({"message": "Sorry, You haven't booked any appointments with us."}), 404
+        return jsonify({"message": "Sorry, you haven't booked any appointments with us."}), 404
 
     result = []
     for a in appointments:
