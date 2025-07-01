@@ -1,9 +1,11 @@
 services:
   - type: web
-    name: mediconnect-backend
+    name: assignment2-backend
     env: python
+    plan: free
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python app.py"
+    runtime: python-3.10
     envVars:
       - key: MONGO_URI
         value: mongodb+srv://archi:vish@cluster.qavglax.mongodb.net/mediconnect?retryWrites=true&w=majority
